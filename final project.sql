@@ -75,12 +75,51 @@ create table teaching (
 
 -- 2. Query
 	-- Thêm, sửa, xoá sinh viên
+	-- Thêm
+insert into student(student_id, name, gender, clazz, dob, phone, address, hometown, major, cpa, email, warning_level)
+values ('20213698', 'asd', 'nam', 'viet nhat 03', '2003-2-1', '09123453', 'ninh binh', 'ninh binh', 'cnnt', '2.99', 'adf@gmail.com', '0');
+	-- Sửa
+update student
+set name = 'asdfaf'
+where student_id = '20213698';
+	-- Xoá
+delete from student
+where student_id = '20213698';
 	-- Chọn ra sinh viên được học bổng theo thứ tự giảm dần (cpa > 3.6)
+	select * from student 
+	where cpa > 3.6
+	order by student_id desc;
 	-- Chọn ra sinh viên học môn A ở kì 20211
+	select student.student_id, student.name
+	from student join enroll_class using (student_id)
+		join class using (class_id)
+		join subject using(subject_id)
+		join teaching using (class_id)
+		where teaching.semester = '20221' and subject.name = 'so so du lieu';
 	-- Chọn giảng viên dạy nhiều môn nhất kì B
+	SELECT lecturer.lecturer_id, lecturer.name, COUNT(lecturer_id) AS so_mon
+FROM lecturer
+JOIN teaching USING (lecturer_id)
+JOIN class USING (class_id)
+JOIN subject USING (subject_id)
+GROUP BY lecturer.lecturer_id, lecturer.name
+ORDER BY so_mon DESC
+LIMIT 1;
+
 	-- Tính số sinh viên nữ của các lớp có mã HP 'IT3090'
+	select count(*) from student
+	join enrollment using(student_id)
+	join subject using (subject_id)
+	where student.gender = 'nu'
+	and subject.name = 'IT3090';
 	-- Hiển thị tên lớp và số lượng sinh viên tương ứng trong mỗi lớp. Sắp xếp kết quả theo số lượng sinh viên giảm dần
+	select class.class_id, count(class.class_id) as num_student from class
+	join enroll_class using(class_id)
+	join student using(student_id)
+	group by class.class_id
+	order by num_student desc;
 	-- Sinh viên có điểm môn X > điểm trung bình của cả lớp
+	select student_id, 
 	-- Đưa ra danh sách học phần, điểm cuối kì cao nhất, thấp nhất, trung bình trong kì A
 -- 3. View
 	-- Thời khoá biểu của sinh viên trong kì
