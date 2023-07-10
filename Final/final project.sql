@@ -85,17 +85,20 @@ create table teaching (
 	-- Xoá
 	delete from student
 	where student_id = '20213698';
+	
 	-- Chọn ra sinh viên được học bổng theo thứ tự giảm dần (cpa > 3.6)
 	select * from student 
 	where cpa > 3.6
 	order by student_id desc;
+	
 	-- Chọn ra sinh viên học môn A ở kì 20211
 	select student.student_id, student.name
 	from student join enroll_class using (student_id)
 	join class using (class_id)
 	join subject using(subject_id)
 	join teaching using (class_id)
-	where teaching.semester = '20221' and subject.name = 'so so du lieu';
+	where teaching.semester = '20221' and subject.name = 'A';
+	
 	-- Chọn giảng viên dạy nhiều môn nhất kì B
 	select lecturer.lecturer_id, lecturer.name, count(lecturer_id) as so_mon
 	from lecturer
@@ -112,12 +115,14 @@ create table teaching (
 	join subject using (subject_id)
 	where student.gender = 'nu'
 	and subject.name = 'IT3090';
+	
 	-- Hiển thị tên lớp và số lượng sinh viên tương ứng trong mỗi lớp. Sắp xếp kết quả theo số lượng sinh viên giảm dần
 	select class.class_id, count(class.class_id) as num_student from class
 	join enroll_class using(class_id)
 	join student using(student_id)
 	group by class.class_id
 	order by num_student desc;
+	
 	-- Sinh viên có điểm môn X > điểm trung bình của cả lớp
 	select * from student
 	join enrollment on student.student_id = enrollment.student_id
@@ -126,6 +131,7 @@ create table teaching (
 		(select avg(subject.percentage * enrollment.endterm_score + (1 - subject.percentage) * enrollment.midterm_score)
 		from enrollment
 		join subject on enrollment.subject_id = subject.subject_id);
+	
 	-- Đưa ra danh sách học phần, điểm cuối kì cao nhất, thấp nhất, trung bình trong kì A
 	select subject.subject_id,
 		   subject.name AS subject_name,
@@ -143,6 +149,7 @@ create table teaching (
 	from enroll_class ec
 	join class c on ec.class_id = c.class_id
 	join subject s on c.subject_id = s.subject_id;
+	
 	-- Danh sách học phần giảng viên A dạy trong kì
 	create view lecturer_subject as
 	select subject.subject_id, subject.name as course_name, class.timing, class.place
@@ -160,7 +167,7 @@ create table teaching (
 		declare
 		gpa float;
 		begin
-			select avg(e.midterm_score*(100-s.percentage_final_exam)/100 + e.final_score*s.percentage_final_exam/100) into gpa
+			select avg(e.midterm_score*(1-s.percentage_final_exam)/1 + e.final_score*s.percentage_final_exam/1) into gpa
 			from enrollment e join subject s using (subject_id)
 			group by (e.student_id, e.semester)
 			having (e.student_id = s_id and e.semester = se);
@@ -214,6 +221,7 @@ create table teaching (
 	before update on enroll_class
 	for each row
 	execute procedure update_student();
+	
 	-- Nếu số sinh viên 1 lớp > tối đa thì khoá đăng kí
 	create or replace function check_dk()
 	returns trigger
